@@ -26,20 +26,40 @@
 
 <body>
     <div id="clock"></div>
-
     <script>
+        async function getTime() {
+            try {
+                const timeApiUrl = "https://worldtimeapi.org/api/ip";
+                const res = await fetch(timeApiUrl);
+                const data = await res.json();
+                return data;
+            } catch (error) {
+                console.error("Failed to get NTP time info:", error);
+                throw error;
+            }
+        }
+
         function updateClock() {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, "0");
-            const minutes = now.getMinutes().toString().padStart(2, "0");
-            const seconds = now.getSeconds().toString().padStart(2, "0");
-            const milliseconds = now.getMilliseconds().toString().padStart(3, "0");
+            const adjustedTime = new Date(baseTime.getTime() + (Date.now() - initialTime));
+
+            const hours = adjustedTime.getHours().toString().padStart(2, "0");
+            const minutes = adjustedTime.getMinutes().toString().padStart(2, "0");
+            const seconds = adjustedTime.getSeconds().toString().padStart(2, "0");
+            const milliseconds = adjustedTime.getMilliseconds().toString().padStart(3, "0");
             const timeString = `${hours}:${minutes}:${seconds}.${milliseconds}`;
             document.getElementById("clock").textContent = timeString;
         }
 
-        // update every 1 milliseconds
-        setInterval(updateClock, 1);
+        let baseTime, initialTime;
+        getTime()
+            .then(timeInfo => {
+                const serverUtcTime = new Date(timeInfo.utc_datetime);
+                const localOffset = serverUtcTime.getTimezoneOffset() * 60000; // in milliseconds
+                baseTime = new Date(serverUtcTime.getTime() - localOffset);
+                initialTime = Date.now();
+                setInterval(updateClock, 1); // update every 1 millisecond
+            })
+            .catch(error => console.error(error));
     </script>
 </body>
 
