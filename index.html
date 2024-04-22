@@ -34,7 +34,7 @@
                 const data = await res.json();
                 return data;
             } catch (error) {
-                console.error("Failed to get NTP time info:", error);
+                console.error("Failed to get time from the server.");
                 throw error;
             }
         }
@@ -53,9 +53,8 @@
         let baseTime, initialTime;
         getTime()
             .then(timeInfo => {
-                const serverUtcTime = new Date(timeInfo.utc_datetime);
-                const localOffset = serverUtcTime.getTimezoneOffset() * 60000; // in milliseconds
-                baseTime = new Date(serverUtcTime.getTime() - localOffset);
+                const serverDatetime = new Date(timeInfo.datetime);
+                baseTime = new Date(serverDatetime.getTime());
                 initialTime = Date.now();
                 setInterval(updateClock, 1); // update every 1 millisecond
             })
