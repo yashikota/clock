@@ -25,14 +25,14 @@
 </head>
 
 <body>
-    <div id="clock"></div>
+    <div id="clock">Loading...</div>
     <script>
         async function getTime() {
             try {
-                const timeApiUrl = "https://worldtimeapi.org/api/ip";
-                const res = await fetch(timeApiUrl);
+                const url = "https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Tokyo";
+                const res = await fetch(url);
                 const data = await res.json();
-                return data;
+                return new Date(data.dateTime);
             } catch (error) {
                 console.error("Failed to get time from the server.");
                 throw error;
@@ -51,12 +51,12 @@
         }
 
         let baseTime, initialTime;
+
         getTime()
-            .then(timeInfo => {
-                const serverDatetime = new Date(timeInfo.datetime);
-                baseTime = new Date(serverDatetime.getTime());
+            .then(time => {
+                baseTime = time;
                 initialTime = Date.now();
-                setInterval(updateClock, 1); // update every 1 millisecond
+                setInterval(updateClock, 1);
             })
             .catch(error => console.error(error));
     </script>
